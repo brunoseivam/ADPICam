@@ -22,6 +22,9 @@
 #include <epicsEvent.h>
 #include <epicsThread.h>
 
+#include <shareLib.h>
+#include <ADDriver.h>
+
 
 #include "picam_advanced.h"
 
@@ -128,7 +131,10 @@ protected:
     // Intensifier
     int PICAM_BracketGating;
     int PICAM_CustomModulationSequence;
-    int PICAM_DifEndingGate;
+    int PICAM_DifEndingGateDelay;
+    int PICAM_DifEndingGateWidth;
+    int PICAM_DifStartingGateDelay;
+    int PICAM_DifStartingGateWidth;
     int PICAM_EMIccdGain;
     int PICAM_EMIccdGainControlMode;
     int PICAM_EnableIntensifier;
@@ -145,14 +151,17 @@ protected:
     int PICAM_PhosphorDecayDelayResolution;
     int PICAM_PhosphorType;
     int PICAM_PhotocathodeSensitivity;
-    int PICAM_RepetitiveGate;
+    int PICAM_RepetitiveGateDelay;
+    int PICAM_RepetitiveGateWidth;
     int PICAM_RepetitiveModulation;
     int PICAM_SequentialStartingModulationPhase;
     int PICAM_SequentialEndingModulationPhase;
-    int PICAM_SequentialEndingGate;
+    int PICAM_SequentialEndingGateDelay;
+    int PICAM_SequentialEndingGateWidth;
     int PICAM_SequentialGateStepCount;
     int PICAM_SequentialGateStepIterations;
-    int PICAM_SequentialStartingGate;
+    int PICAM_SequentialStartingGateDelay;
+    int PICAM_SequentialStartingGateWidth;
 
     //ADC
     int PICAM_AdcAnalogGain;
@@ -163,7 +172,8 @@ protected:
     int PICAM_CorrectPixelBias;
 
     //Hardware I/O
-    int PICAM_AuxOutput;
+    int PICAM_AuxOutputDelay;
+    int PICAM_AuxOutputWidth;
     int PICAM_EnableModulationOutputSignal;
     int PICAM_ModulationOutputSignalFrequency;
     int PICAM_ModulationOutputSignalAmplitude;
@@ -530,6 +540,11 @@ protected:
 #define PICAM_LAST_PARAM PICAM_SensorTemperatureStatusRelevant
 
 private:
+    struct PulseParameterIndexes {
+        int delayIndex;
+        int widthIndex;
+    };
+
     void *acqAvailableInitialReadout;
     pi64s acqAvailableReadoutCount;
     piflt acqStatusReadoutRate;
@@ -554,6 +569,7 @@ private:
     std::unordered_map<PicamParameter, int> parameterRelevantMap;
     std::unordered_map<PicamParameter, int> parameterValueMap;
     std::unordered_map<int, PicamParameter> picamParameterMap;
+    std::unordered_map<PicamParameter, PulseParameterIndexes> pulseParameterValueMap;
     asynStatus initializeDetector();
     asynStatus piAcquireStart();
     asynStatus piAcquireStop();
@@ -572,8 +588,8 @@ private:
             int &existsIndex, int &relevantIndex,
             PicamParameter picamParameter);
     asynStatus piCreateAndIndexPIPulseParam(const char * name,
-            int &existsIndex, int &relevantIndex,
-            PicamParameter picamParameter);
+            int &delayIndex, int &widthIndex, int &existsIndex,
+            int &relevantIndex, PicamParameter picamParameter);
     asynStatus piCreateAndIndexPIRoisParam(const char * name,
             int &existsIndex, int &relevantIndex,
             PicamParameter picamParameter);
@@ -583,6 +599,7 @@ private:
             int driverParam, PicamParameter picamParam);
     asynStatus piLoadUnavailableCameraIDs();
     int piLookupDriverParameter(PicamParameter picamParameter);
+    PulseParameterIndexes piLookupDriverPulseParameter(PicamParameter picamParameter);
     PicamError piLookupPICamParameter(int driverParameter,
             PicamParameter &parameter);
     asynStatus piRegisterConstraintChangeWatch(PicamHandle cameraHandle);
