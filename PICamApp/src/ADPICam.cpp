@@ -3452,26 +3452,78 @@ asynStatus ADPICam::piRegisterValueChangeWatch(PicamHandle cameraHandle) {
  */
 asynStatus ADPICam::piSetParameterExists(asynUser *pasynUser,
         PicamParameter parameter, int exists) {
-    int status = asynSuccess;
-    int driverParameter = -1;
-    //static const char *functionName = "piSetParameterExists";
-    const pichar* string;
+    asynStatus status = asynSuccess;
+    int driverExistsParameter = -1;
+    static const char *functionName = "piSetParameterExists";
 
     try {
-        driverParameter = parameterExistsMap.at(parameter);
+        driverExistsParameter = parameterExistsMap.at(parameter);
     }
     catch (std::out_of_range e) {
-        Picam_GetEnumerationString(PicamEnumeratedType_Parameter, parameter,
-                &string);
+        std::string parameterName = Picam_GetEnumerationString(PicamEnumeratedType_Parameter, parameter);
         asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s:%s ---- Can't find parameter %s\n",
-                driverName,
-                __func__,
-                string);
-        Picam_DestroyString(string);
+                driverName, __func__, parameterName.c_str());
         return asynError;
     }
-    setIntegerParam(driverParameter, exists);
-    return (asynStatus) status;
+
+    setIntegerParam(driverExistsParameter, exists);
+    callParamCallbacks();
+
+    if (!exists)
+        return asynSuccess;
+
+    // Populate enums, in case a parameter that didn't exist before does exist now
+    int driverParameter = -1;
+    try {
+        driverParameter = parameterValueMap.at(parameter);
+    } catch (const std::out_of_range & e) {
+        std::string parameterName = Picam_GetEnumerationString(PicamEnumeratedType_Parameter, parameter);
+        asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s:%s ---- Can't find parameter %s\n",
+                driverName, __func__, parameterName.c_str());
+        return asynError;
+    }
+
+    PicamConstraintType constraintType;
+    PicamError error = Picam_GetParameterConstraintType(currentCameraHandle,
+            parameter, &constraintType);
+
+    if (error != PicamError_None) {
+        std::string errorString = Picam_GetEnumerationString(
+            PicamEnumeratedType_Error, error);
+        std::string parameterName = Picam_GetEnumerationString(
+            PicamEnumeratedType_Parameter, parameter);
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+            "%s:%s Could not determine constraint type for "
+            "parameter %s. %s\n",
+            driverName, __func__, parameterName.c_str(),
+            errorString.c_str());
+        return asynError;
+    }
+
+    if (constraintType == PicamConstraintType_Collection) {
+        char *strings[MAX_ENUM_STATES] = {};
+        int values[MAX_ENUM_STATES] = {};
+        int severities[MAX_ENUM_STATES] {};
+        size_t nIn = 0;
+
+        status = piGenerateListValuesFromCollection(pasynUser, strings,
+            values, severities, &nIn, driverParameter, parameter);
+
+        if (status == asynSuccess) {
+            std::string parameterName = Picam_GetEnumerationString(PicamEnumeratedType_Parameter, parameter);
+            asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s populating %lu enum choices for %s\n",
+                driverName, functionName, nIn, parameterName.c_str());
+
+            for (size_t i = 0; i < nIn; ++i) {
+                asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s   choice %lu: value=%d severity=%d string=%s\n",
+                    driverName, functionName, i, values[i], severities[i], strings[i]);
+            }
+
+            doCallbacksEnum(strings, values, severities, nIn, driverParameter, 0);
+        }
+    }
+
+    return status;
 }
 
 /**
