@@ -3894,8 +3894,33 @@ asynStatus ADPICam::piSetRois(int minX, int minY, int width, int height,
     const pichar *errorString;
 
     PicamError error = PicamError_None;
-    getIntegerParam(ADMaxSizeX, & numXPixels);
-    getIntegerParam(ADMaxSizeY, & numYPixels);
+
+    // Refresh sensor size
+    error = Picam_GetParameterIntegerValue(currentCameraHandle, PicamParameter_SensorActiveWidth, &numXPixels);
+    if (error != PicamError_None) {
+        Picam_GetEnumerationString(PicamEnumeratedType_Error, error,
+                &errorString);
+        asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+                "%s:%s Error retrieving Sensor Active Width %s\n", driverName, functionName,
+                errorString);
+        Picam_DestroyString(errorString);
+        return asynError;
+    }
+ 
+    error = Picam_GetParameterIntegerValue(currentCameraHandle, PicamParameter_SensorActiveHeight, &numYPixels);
+    if (error != PicamError_None) {
+        Picam_GetEnumerationString(PicamEnumeratedType_Error, error,
+                &errorString);
+        asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+                "%s:%s Error retrieving Sensor Active Height %s\n", driverName, functionName,
+                errorString);
+        Picam_DestroyString(errorString);
+        return asynError;
+    }
+    setIntegerParam(ADMaxSizeX, numXPixels);
+    setIntegerParam(ADMaxSizeY, numYPixels);
+    callParamCallbacks();
+
     error = Picam_GetParameterRoisValue(currentCameraHandle,
             PicamParameter_Rois, &rois);
     if (error != PicamError_None) {
