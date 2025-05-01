@@ -3880,6 +3880,18 @@ asynStatus ADPICam::piSetParameterValuesFromSelectedCamera() {
     return (asynStatus) status;
 }
 
+static void printRangeConstraint(const PicamRangeConstraint *c) {
+    printf("    Sev: %s  Empty Set: %s  Min,Max: [%f,%f]  Incr: %f  ", 
+        c->severity == PicamConstraintSeverity_Error ? "Err " : "Warn",
+        c->empty_set ? "true" : "false",
+	c->minimum, c->maximum, c->increment);
+    printf("Excluded Vals: [");
+    for (int i = 0; i < c->excluded_values_count; ++i) { printf("%f ", c->excluded_values_array[i]); }
+    printf("]  Outlying Vals: [");
+    for (int i = 0; i < c->outlying_values_count; ++i) { printf("%f ", c->outlying_values_array[i]); }
+    printf("]\n");
+}
+
 /**
  * Set values for the ROI parameters.  PICAM holds these parameters in a single
  * object instead of as separate parameters.
@@ -3935,7 +3947,6 @@ asynStatus ADPICam::piSetRois(int minX, int minY, int width, int height,
     error = Picam_GetParameterRoisConstraint(currentCameraHandle,
             PicamParameter_Rois, PicamConstraintCategory_Required,
             &roisConstraints);
-    printf ("ROIConstraints->rules 0x%X\n", roisConstraints->rules);
     if (error != PicamError_None) {
         Picam_GetEnumerationString(PicamEnumeratedType_Error, error,
                 &errorString);
@@ -3945,6 +3956,30 @@ asynStatus ADPICam::piSetRois(int minX, int minY, int width, int height,
         Picam_DestroyString(errorString);
         return asynError;
     }
+    printf("ROI Constraints\n");
+    printf("  Rules: 0x%0X ", roisConstraints->rules);
+    if (roisConstraints->rules & PicamRoisConstraintRulesMask_XBinningAlignment)     { printf("XBinningAlignment ");     }
+    if (roisConstraints->rules & PicamRoisConstraintRulesMask_YBinningAlignment)     { printf("YBinningAlignment ");     }
+    if (roisConstraints->rules & PicamRoisConstraintRulesMask_HorizontalSymmetry)    { printf("HorizontalSymmetry ");    }
+    if (roisConstraints->rules & PicamRoisConstraintRulesMask_VerticalSymmetry)      { printf("VerticalSymmetry ");      }
+    if (roisConstraints->rules & PicamRoisConstraintRulesMask_SymmetryBoundsBinning) { printf("SymmetryBoundsBinning "); }
+    printf("\n");
+    printf("  Scope: %s\n", roisConstraints->scope == PicamConstraintScope_Independent ? "Independent" : "Dependent");
+    printf("  Severity: %s\n", roisConstraints->severity == PicamConstraintSeverity_Error ? "Error" : "Warning");
+    printf("  Empty Set: %s\n", roisConstraints->empty_set ? "true" : "false");
+    printf("  Max ROI Count: %d\n", roisConstraints->maximum_roi_count);
+    printf("  X Constraint:\n");      printRangeConstraint(&roisConstraints->x_constraint);
+    printf("  Width Constraint:\n");  printRangeConstraint(&roisConstraints->width_constraint);
+    printf("  Valid X Bin Vals: [");
+    for (int i = 0; i < roisConstraints->x_binning_limits_count; ++i) { printf("%d ", roisConstraints->x_binning_limits_array[i]); };
+    printf("]\n");
+    printf("  Y Constraint:\n");      printRangeConstraint(&roisConstraints->y_constraint);
+    printf("  Height Constraint:\n"); printRangeConstraint(&roisConstraints->height_constraint);
+    printf("  Valid Y Bin Vals: [");
+    for (int i = 0; i < roisConstraints->y_binning_limits_count; ++i) { printf("%d ", roisConstraints->y_binning_limits_array[i]); };
+    printf("]\n");
+
+
     if (rois->roi_count == 1) {
         PicamRoi *roi = &(rois->roi_array[0]);
         //bool allInRange = true;
