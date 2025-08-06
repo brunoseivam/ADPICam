@@ -265,6 +265,7 @@ protected:
     int PICAM_CleanSectionFinalHeightCount;
     int PICAM_CleanSerialRegister;
     int PICAM_CleanUntilTrigger;
+    int PICAM_StopCleaningOnPreTrigger;
 
     //Sensor Temperature
     int PICAM_DisableCoolingFan;
@@ -402,6 +403,7 @@ protected:
     int PICAM_CleanSectionFinalHeightCountExists;
     int PICAM_CleanSerialRegisterExists;
     int PICAM_CleanUntilTriggerExists;
+    int PICAM_StopCleaningOnPreTriggerExists;
     int PICAM_DisableCoolingFanExists;
     int PICAM_EnableSensorWindowHeaterExists;
     int PICAM_SensorTemperatureReadingExists;
@@ -532,6 +534,7 @@ protected:
     int PICAM_CleanSectionFinalHeightCountRelevant;
     int PICAM_CleanSerialRegisterRelevant;
     int PICAM_CleanUntilTriggerRelevant;
+    int PICAM_StopCleaningOnPreTriggerRelevant;
     int PICAM_DisableCoolingFanRelevant;
     int PICAM_EnableSensorWindowHeaterRelevant;
     int PICAM_SensorTemperatureReadingRelevant;
@@ -794,6 +797,7 @@ private:
 #define PICAM_CleanSectionFinalHeightCountString "PICAM_CLEAN_SECTION_FINAL_HEIGHT_COUNT"
 #define PICAM_CleanSerialRegisterString          "PICAM_CLEAN_SERIAL_REGISTER"
 #define PICAM_CleanUntilTriggerString            "PICAM_CLEAN_UNTIL_TRIGGER"
+#define PICAM_StopCleaningOnPreTriggerString     "PICAM_STOP_CLEANING_ON_PRE_TRIGGER"
 
 //Sensor Temperature
 #define PICAM_DisableCoolingFanString          "PICAM_DISABLE_COOLING_FAN"

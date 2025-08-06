@@ -831,6 +831,11 @@ ADPICam::ADPICam(const char *portName, int maxBuffers, size_t maxMemory,
             PICAM_CleanUntilTriggerExists,
             PICAM_CleanUntilTriggerRelevant,
             PicamParameter_CleanUntilTrigger);
+    piCreateAndIndexPIParam(PICAM_StopCleaningOnPreTriggerString, asynParamInt32,
+            PICAM_StopCleaningOnPreTrigger,
+            PICAM_StopCleaningOnPreTriggerExists,
+            PICAM_StopCleaningOnPreTriggerRelevant,
+            PicamParameter_StopCleaningOnPreTrigger);
 
     //Sensor Temperature
     piCreateAndIndexPIParam(PICAM_DisableCoolingFanString, asynParamInt32,

@@ -998,6 +998,16 @@ PICam specific parameters
       $(P)$(R)CleanUntilTrigger_RBV
     - bo  
       bi
+  * - PICAM_StopCleaningOnPreTrigger
+    - asynInt32
+    - r/w
+    -
+    - PICAM_STOP_CLEANING_ON_PRE_TRIGGER
+    - $(P)$(R)StopCleaningOnPreTrigger
+      $(P)$(R)StopCleaningOnPreTrigger_RBV
+    - bo
+      bi
+
   * - **SensorTemperature**
   * - PICAM_DisableCoolingFan
     - asynInt32

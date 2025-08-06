@@ -1069,6 +1069,14 @@ record(bi, "$(P)$(R)CleanUntilTrigger_EX")
     field(SCAN, "I/O Intr")
 }
 
+record(bi, "$(P)$(R)StopCleaningOnPreTrigger_EX")
+{
+    field(DESC, "")
+    field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))PICAM_STOP_CLEANING_ON_PRE_TRIGGER")
+    field(DTYP, "asynInt32")
+    field(SCAN, "I/O Intr")
+}
+
 record(bi, "$(P)$(R)DisableCoolingFan_EX")
 {
     field(DESC, "")
@@ -2073,6 +2081,14 @@ record(bi, "$(P)$(R)CleanUntilTrigger_PR")
 {
     field(DESC, "")
     field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))PICAM_CLEAN_UNTIL_TRIGGER_PR")
+    field(DTYP, "asynInt32")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(P)$(R)StopCleaningOnPreTrigger_PR")
+{
+    field(DESC, "")
+    field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))PICAM_STOP_CLEANING_ON_PRE_TRIGGER")
     field(DTYP, "asynInt32")
     field(SCAN, "I/O Intr")
 }
@@ -3596,6 +3612,20 @@ record(bo, "$(P)$(R)CleanUntilTrigger")
 record(bi, "$(P)$(R)CleanUntilTrigger_RBV")
 {
     field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))PICAM_CLEAN_UNTIL_TRIGGER")
+    field(DTYP, "asynInt32")
+    field(SCAN, "I/O Intr")
+}
+
+record(bo, "$(P)$(R)StopCleaningOnPreTrigger")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))PICAM_STOP_CLEANING_ON_PRE_TRIGGER")
+}
+
+record(bi, "$(P)$(R)StopCleaningOnPreTrigger_RBV")
+{
+    field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))PICAM_STOP_CLEANING_ON_PRE_TRIGGER")
     field(DTYP, "asynInt32")
     field(SCAN, "I/O Intr")
 }
